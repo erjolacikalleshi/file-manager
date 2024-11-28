@@ -114,4 +114,14 @@ json-server src/app/db.json --port 3000
   - Navigate easily through the folder hierarchy by clicking on breadcrumb links, which dynamically update.
 - **Snack Bars:** 
   - Used for success and error messages during user actions.
+- **User accounts:**
+  - Admin:
+    - username: admin
+    - pass: adminpassword
+  - User:
+    - username: user
+    - pass: userpassword
+  - User with no access:
+    - username: random
+    - pass: randompassword
 
