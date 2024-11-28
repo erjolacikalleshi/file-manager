@@ -1,0 +1,33 @@
+<div class="center-content">
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <mat-card class="example-card">
+            <mat-card-header>
+                <mat-card-title>Register</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <!-- Error Message -->
+                <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+                <mat-form-field class="example-full-width">
+                    <mat-label>Username</mat-label>
+                    <input matInput formControlName="username" [ngClass]="{ 'is-invalid':f['username'].errors }" />
+                    <mat-icon matSuffix>person</mat-icon>
+                    <mat-error *ngIf="f['username'].errors">
+                        <span *ngIf="f['username'].errors['required']">Username is required</span>
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field class="example-full-width">
+                    <mat-label>Password</mat-label>
+                    <input matInput type="password" formControlName="password"
+                        [ngClass]="{ 'is-invalid': f['password'].errors }" />
+                    <mat-icon matSuffix>vpn_key</mat-icon>
+                    <mat-error *ngIf="f['password'].errors">
+                        <span *ngIf="f['password'].errors['required']">Password is required</span>
+                    </mat-error>
+                </mat-form-field>
+            </mat-card-content>
+            <mat-card-actions>
+                <button mat-raised-button color="primary" [disabled]="registerForm.invalid">Register</button>
+            </mat-card-actions>
+        </mat-card>
+    </form>
+</div>

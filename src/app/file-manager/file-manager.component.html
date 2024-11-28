@@ -1,0 +1,32 @@
+<mat-toolbar color="basic" class="file-manager-toolbar">
+  <!-- New Directory Button -->
+  <button mat-raised-button matTooltip="Create Folder" (click)="openDialog({ action: 'create', data: null })">
+    <mat-icon>create_new_folder</mat-icon>
+    NEW DIRECTORY
+  </button>
+
+  <span class="spacer"></span>
+
+  <!-- Toogle Icon -->
+  <button mat-icon-button class="toggle-folder-tree" (click)="folderTreeSidenav.toggle()" *ngIf="isSmallScreen"
+    matTooltip="Collapse Sidebar">
+    <mat-icon>menu</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-sidenav-container class="file-manager-layout">
+  <mat-sidenav #folderTreeSidenav mode="side" [opened]="true" class="folder-tree">
+    <!-- Sidebar for Folder Tree -->
+    <div class="folder-tree">
+      <app-folder-tree [data]="data" (folderOpened)="onFolderOpened($event)" (actionTriggered)="openDialog($event)">
+      </app-folder-tree>
+    </div>
+  </mat-sidenav>
+  <!-- Main Content Area for Files -->
+  <mat-sidenav-content>
+    <div class="file-list">
+      <app-file-list [files]="files" (actionTriggered)="openDialog($event)"></app-file-list>
+    </div>
+  </mat-sidenav-content>
+
+</mat-sidenav-container>

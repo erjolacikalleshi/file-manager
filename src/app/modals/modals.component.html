@@ -1,0 +1,134 @@
+<h2 mat-dialog-title>
+  <ng-container [ngSwitch]="actionType" *ngIf="actionType === 'create' && !folder">
+    <span>Create Folder</span>
+  </ng-container>
+
+  <ng-container [ngSwitch]="actionType" *ngIf="folder && folder?.isFolder">
+    <span *ngSwitchCase="'create'">Create Folder</span>
+    <span *ngSwitchCase="'rename'">Rename Folder</span>
+    <span *ngSwitchCase="'delete'">Delete Folder</span>
+    <span *ngSwitchCase="'upload'">Upload File</span>
+    <span *ngSwitchCase="'tags'">Folder Tags</span>
+    <span *ngSwitchDefault>Create Folder</span>
+  </ng-container>
+
+  <ng-container [ngSwitch]="actionType" *ngIf="folder && !folder?.isFolder">
+    <span *ngSwitchCase="'rename'">Rename File</span>
+    <span *ngSwitchCase="'delete'">Delete File</span>
+    <span *ngSwitchCase="'move'">Move File</span>
+    <span *ngSwitchCase="'copy'">Copy File</span>
+    <span *ngSwitchCase="'tags'">File Tags</span>
+    <span *ngSwitchCase="'compress'">Compress File</span>
+    <span *ngSwitchCase="'revert'">Revert File</span>
+    <span *ngSwitchDefault>Rename File</span>
+  </ng-container>
+</h2>
+
+<mat-dialog-content>
+  <ng-container [ngSwitch]="actionType">
+
+    <div *ngSwitchCase="'create'">
+      <mat-form-field appearance="fill">
+        <mat-label>Folder Name</mat-label>
+        <input matInput [(ngModel)]="newFolderName" />
+      </mat-form-field>
+    </div>
+
+    <div *ngSwitchCase="'rename'">
+      <mat-form-field appearance="fill">
+        <mat-label *ngIf="folder?.isFolder">Folder Name</mat-label>
+        <mat-label *ngIf="!folder?.isFolder">File Name</mat-label>
+        <input matInput [(ngModel)]="folderName" />
+      </mat-form-field>
+    </div>
+
+    <div *ngSwitchCase="'delete'">
+      <p *ngIf="!showMsg && folder?.isFolder">Are you sure you want to delete the folder "{{folderName}}"?</p>
+      <p *ngIf="!showMsg && !folder?.isFolder">Are you sure you want to delete the file "{{folderName}}"?</p>
+      <p *ngIf="showMsg">Are you sure you want to delete the selected items?</p>
+    </div>
+
+    <div *ngSwitchCase="'upload'">
+      <div class="file-upload-container">
+        <button mat-raised-button color="primary" (click)="fileInput.click()">
+          Choose File
+          <input #fileInput type="file" accept=".pdf, .txt, .png, .jpg, .jpeg" (change)="onFileSelected($event)"
+            hidden />
+        </button>
+
+        <div *ngIf="selectedFile" class="file-info">
+          <p>Selected File: {{ selectedFile.name }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div *ngSwitchCase="'move'">
+      <mat-form-field>
+        <mat-label>Select Folder</mat-label>
+        <mat-select [(ngModel)]="selectedFolder">
+          <mat-option *ngFor="let l of list" [value]="l.id">
+            {{l.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div *ngSwitchCase="'copy'">
+      <mat-form-field>
+        <mat-label>Select Folder</mat-label>
+        <mat-select [(ngModel)]="selectedFolder">
+          <mat-option *ngFor="let l of list" [value]="l.id">
+            {{l.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div *ngSwitchCase="'tags'">
+      <mat-form-field>
+        <mat-chip-grid #myChipGrid [(ngModel)]="tags">
+          <mat-chip-row *ngFor="let f of tags" (removed)="removeTag(f)">
+            {{f}}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-row>
+          <input [matChipInputFor]="myChipGrid" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+            (matChipInputTokenEnd)="addTag($event)" />
+        </mat-chip-grid>
+      </mat-form-field>
+    </div>
+
+    <div *ngSwitchCase="'compress'">
+      <p>Enter the file name for the compression of {{folderName}}</p>
+      <mat-form-field appearance="fill">
+        <mat-label>File Name</mat-label>
+        <input matInput [(ngModel)]="zipName" />
+      </mat-form-field>
+    </div>
+
+    <div *ngSwitchCase="'revert'">
+      <p *ngIf="!folder?.isFolder">Are you sure you want to revert the file "{{folderName}}"?</p>
+    </div>
+
+  </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions-end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button color="primary" (click)="onSubmit()" cdkFocusInitial
+    [disabled]="(actionType === 'upload' && !selectedFile) || (actionType === 'create' && !newFolderName)">
+    <ng-container [ngSwitch]="actionType">
+      <span *ngSwitchCase="'create'">Create</span>
+      <span *ngSwitchCase="'rename'">Rename</span>
+      <span *ngSwitchCase="'delete'">Delete</span>
+      <span *ngSwitchCase="'upload'">Upload</span>
+      <span *ngSwitchCase="'move'">Move</span>
+      <span *ngSwitchCase="'copy'">Copy</span>
+      <span *ngSwitchCase="'tags'">Save</span>
+      <span *ngSwitchCase="'compress'">Compress</span>
+      <span *ngSwitchCase="'revert'">Revert</span>
+      <span *ngSwitchDefault>Create</span>
+    </ng-container>
+  </button>
+</mat-dialog-actions>

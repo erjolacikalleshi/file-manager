@@ -1,0 +1,33 @@
+.mat-mdc-dialog-content {
+  mat-form-field {
+    width: 100%;
+    margin-bottom: 20px;
+
+  }
+
+  .file-upload-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    margin: 16px;
+
+    .file-info {
+      font-size: 14px;
+      color: #555;
+    }
+  }
+}
+
+.mat-mdc-dialog-actions {
+  justify-content: flex-end;
+  padding: 16px;
+
+  button {
+    margin-left: 10px;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}

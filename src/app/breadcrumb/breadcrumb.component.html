@@ -1,0 +1,8 @@
+<nav class="breadcrumb">
+  <ng-container *ngFor="let crumb of breadcrumbs; let last = last">
+    <span class="breadcrumb-item" [class.active]="last">
+      <a (click)="navigateTo(crumb)">{{ crumb.name }}</a>
+    </span>
+    <mat-icon *ngIf="!last" class="breadcrumb-separator">arrow_right</mat-icon>
+  </ng-container>
+</nav>

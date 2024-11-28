@@ -1,0 +1,12 @@
+<mat-toolbar color="primary" class="main-toolbar" *ngIf="!isLoggedIn()">
+  <span>File Manager</span>
+  <span class="spacer"></span>
+  <mat-slide-toggle matTooltip="Change theme" (change)="toggleTheme()"></mat-slide-toggle>
+  <mat-divider vertical></mat-divider>
+  <button mat-icon-button matTooltip="Logout" (click)="logout()">
+    <mat-icon>logout</mat-icon>
+  </button>
+</mat-toolbar>
+<div class="main-content">
+  <router-outlet></router-outlet>
+</div>

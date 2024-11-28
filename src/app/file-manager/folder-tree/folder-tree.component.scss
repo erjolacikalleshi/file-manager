@@ -1,0 +1,61 @@
+@use '@angular/material' as mat;
+
+.node-icon {
+  margin-right: 8px;
+}
+
+.clickable-node {
+	display: flex;
+	align-items: center;
+	padding: 8px;
+	cursor: pointer;
+	&.selected {
+		background-color: #f0f0f0;
+		font-weight: bold;
+	}
+}
+
+.selected-node {
+  background-color: #e0f7fa;
+  border-left: 4px solid #00acc1;
+}
+
+// .tree-node {
+//   position: relative;
+// }
+
+.more-options-button {
+  display: block;
+  position: absolute;
+  right: 0;
+}
+
+// .tree-node:hover .more-options-button {
+//   display: block;
+// }
+
+.tree-node.highlight {
+  background-color: #e0f7fa;
+  border: 1px dashed #00796b;
+}
+
+.mat-tree-node {
+  user-select: none;
+  cursor: move;
+
+  &.cdk-drag-preview {
+    @include mat.elevation(12);
+  }
+
+  &.cdk-drag-placeholder {
+    opacity: 0;
+  }
+}
+
+.cdk-drop-list-dragging .mat-tree-node:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drag-animating {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}

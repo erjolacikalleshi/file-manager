@@ -1,0 +1,19 @@
+.not-authorized-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+
+  mat-card {
+    width: 400px;
+  }
+
+  mat-card-title {
+    font-size: 20px;
+  }
+
+  p {
+    font-size: 16px;
+    color: #555;
+  }
+}

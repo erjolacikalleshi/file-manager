@@ -1,0 +1,79 @@
+<!-- Breadcrumb Navigation -->
+<app-breadcrumb *ngIf="selectedNode && breadcrumbs.length > 0"
+  [breadcrumbs]="breadcrumbs"
+  (breadcrumbClick)="onBreadcrumbClick($event)"
+></app-breadcrumb>
+
+<!-- Tree structure -->
+  <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" cdkDropList
+  (cdkDropListDropped)="drop($event)">
+    <!-- Tree node template for leaf nodes (files) -->
+    <mat-tree-node  *matTreeNodeDef="let node"
+    matTreeNodeToggle
+    matTreeNodePadding
+    cdkDrag
+    [cdkDragData]="node"
+    (mouseenter)="dragHover(node)"
+    (mouseleave)="dragHoverEnd()"
+    (cdkDragStarted)="dragStart()"
+    (cdkDragReleased)="dragEnd()"
+    [class.drag-highlight]="highlightedNode && node.id === highlightedNode.id">
+      <button mat-icon-button disabled></button> 
+      
+      <mat-icon class="node-icon" aria-hidden="true" *ngIf="!node.isFolder">insert_drive_file</mat-icon>   
+      <mat-icon class="node-icon" aria-hidden="true" *ngIf="node.isFolder">folder</mat-icon>     
+      {{ node.name }}
+      <!-- More options button -->
+      <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="More options" class="more-options-button">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="setAction('create', node)" *ngIf="node.isFolder"><mat-icon>create_new_folder</mat-icon><span>New Directory</span></button>
+        <button mat-menu-item (click)="setAction('rename', node)"><mat-icon>drive_file_rename_outline</mat-icon><span>Rename</span></button>
+        <button mat-menu-item (click)="setAction('delete', node)" *ngIf="role == 'admin'"><mat-icon>delete_outline</mat-icon><span>Delete</span></button>
+        <button mat-menu-item (click)="setAction('upload', node)" *ngIf="node.isFolder"><mat-icon>upload_file</mat-icon><span>Upload File</span></button>
+        <button mat-menu-item (click)="setAction('move', node)" *ngIf="!node.isFolder"><mat-icon>input</mat-icon><span>Move To</span></button>
+        <button mat-menu-item (click)="setAction('copy', node)" *ngIf="!node.isFolder"><mat-icon>file_copy</mat-icon><span>Copy To</span></button>
+        <button mat-menu-item (click)="setAction('revert', node)" *ngIf="!node.isFolder && node.versions?.length > 0"><mat-icon>history</mat-icon><span>Revert to previous version</span></button>
+      </mat-menu>
+    </mat-tree-node>
+  
+   
+    <!-- Tree node template for expandable nodes (folders) -->
+    <mat-tree-node *matTreeNodeDef="let node;when: hasChild"
+    matTreeNodePadding
+    cdkDrag
+    [cdkDragData]="node"
+    (mouseenter)="dragHover(node)"
+    (mouseleave)="dragHoverEnd()"
+    (cdkDragStarted)="dragStart()"
+    (cdkDragReleased)="dragEnd()"
+    [class.highlight]="highlightedNode && node.id === highlightedNode.id">
+      <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name" (click)="expansionModel.toggle(node.id)">
+        <mat-icon class="mat-icon-rtl-mirror">{{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}</mat-icon>
+      </button>
+      <div class="clickable-node" [class.selected]="selectedNode && selectedNode.id === node.id" (click)="onNodeSelect(node)">
+        
+        <ng-container *ngIf="node.expandable; else fileIcon">
+          <mat-icon class="node-icon" *ngIf="!treeControl.isExpanded(node)" aria-hidden="true">folder</mat-icon>
+          <mat-icon class="node-icon" *ngIf="treeControl.isExpanded(node)" aria-hidden="true">folder_open</mat-icon>
+        </ng-container>
+        <ng-template #fileIcon>
+          <mat-icon class="node-icon" aria-hidden="true">insert_drive_file</mat-icon>
+        </ng-template>        
+        {{ node.name }}
+      </div>
+      
+      <!-- More options button -->
+      <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="More options" class="more-options-button">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="setAction('create', node)"><mat-icon>create_new_folder</mat-icon><span>New Directory</span></button>
+        <button mat-menu-item (click)="setAction('rename', node)"><mat-icon>drive_file_rename_outline</mat-icon><span>Rename</span></button>
+        <button mat-menu-item (click)="setAction('delete', node)" *ngIf="role == 'admin'"><mat-icon>delete_outline</mat-icon><span>Delete</span></button>
+        <button mat-menu-item (click)="setAction('upload', node)"><mat-icon>upload_file</mat-icon><span>Upload File</span></button>
+      </mat-menu>
+    </mat-tree-node>
+  </mat-tree>
+  

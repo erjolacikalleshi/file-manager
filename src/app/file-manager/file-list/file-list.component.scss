@@ -1,0 +1,17 @@
+table {
+  width: 100%;
+
+  th.mat-sort-header-sorted {
+    color: black;
+  }
+}
+
+.search-bar-container {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+
+  .mat-mdc-outlined-button.mat-mdc-button-base {
+    height: 56px !important;
+  }
+}

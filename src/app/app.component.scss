@@ -1,0 +1,19 @@
+.main-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .spacer {
+    flex: 1;
+  }
+
+  mat-divider[vertical] {
+    height: 24px;
+    margin-left: 10px;
+    align-self: center;
+    border-right-color: white;
+  }
+}
