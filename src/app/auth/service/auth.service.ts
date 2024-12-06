@@ -1,13 +1,24 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 
-interface User {
+export interface User {
   id: number;
-  username: string;
+  email: string;
+  password?: string;
+  role?: string;
+  accessToken: string;
+}
+
+export interface AuthResponse {
+  accessToken: string;
+  user: Pick<User, 'email' | 'id'>;
+}
+
+export interface LoginCredentials {
+  email: string;
   password: string;
-  role: string;
 }
 
 @Injectable({
@@ -15,37 +26,53 @@ interface User {
 })
 export class AuthService {
   private apiUrl = 'http://localhost:3000/users';
-  private currentUser: User | null = null;
   private userSubject = new BehaviorSubject<User | null>(null);
   currentUser$ = this.userSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {}
-
-  getUsers(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
-  }
-  
-  register(newUser: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, newUser);
+  constructor(private http: HttpClient, private router: Router) {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      this.userSubject.next(JSON.parse(storedUser));
+    }
   }
 
-  setUser(user: User): void {
-    this.currentUser = user;
-    this.userSubject.next(user);
-  }
+  register(user: AuthResponse): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, user).pipe(
+      tap(response => {
+        this.setCurrentUser(response);
+      })
+    );
+  }  
 
-  getUser(): User | null {
-    return this.currentUser;
+  login(email: string, password: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`http://localhost:3000/login`, { email, password });
   }
 
   logout(): void {
-    this.currentUser = null;
-    sessionStorage.removeItem('role')
+    localStorage.removeItem('currentUser');
+    this.userSubject.next(null);
     this.router.navigate(['/']);
   }
 
+  public setCurrentUser(response: AuthResponse): void {
+    const user: User = {
+      id: response.user.id,
+      email: response.user.email,
+      password: '',
+      role: '',
+      accessToken: response.accessToken
+    };
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    this.userSubject.next(user);
+  }
+
   get isLoggedIn(): boolean {
-    return sessionStorage.getItem('role') !== null;
+    return !!this.userSubject.value;
+  }
+
+  get token(): string {
+    const user = this.userSubject.value;
+    return user ? user.accessToken : '';
   }
   
 }

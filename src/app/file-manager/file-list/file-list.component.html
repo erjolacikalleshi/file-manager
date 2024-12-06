@@ -1,5 +1,6 @@
-<h3 *ngIf="files.length == 0">Click an expandable folder to select it and see its respective files</h3>
-<h3 *ngIf="files.length > 0">You may unselect this folder by choosing another expandable folder</h3>
+<h3 *ngIf="showMsg">Click a folder to select it and see its respective files</h3>
+<h3 *ngIf="files.length == 0 && !showMsg">No available folders and files for this folder</h3>
+<h3 *ngIf="files.length > 0 && !showMsg">You may unselect this folder by choosing another folder</h3>
 
 <div class="search-bar-container" *ngIf="files.length > 0">
   <mat-form-field appearance="outline">
@@ -12,16 +13,26 @@
     <input matInput placeholder="Search by tags" [(ngModel)]="searchTags" (input)="applyFilter()" />
   </mat-form-field>
 
+  <!-- <mat-form-field appearance="fill">
+    <mat-label>Search by Tags</mat-label>
+    <mat-chip-listbox #chipList>
+      <mat-chip-option *ngFor="let tag of availableTags" [selected]="isTagSelected(tag)" (click)="toggleTagSelection(tag)">
+        {{ tag }}
+      </mat-chip-option>
+    </mat-chip-listbox>
+  </mat-form-field> -->
+
   <mat-form-field appearance="outline">
     <mat-label>Filter by File Type</mat-label>
     <mat-select [(ngModel)]="selectedFileType" (selectionChange)="applyAdvancedFilter()" multiple>
-      <mat-option value="image">Images</mat-option>
-      <mat-option value="document">Documents</mat-option>
+      <mat-option *ngFor="let fileType of uniqueFileTypes" [value]="fileType">
+        {{ fileType }}
+      </mat-option>
     </mat-select>
   </mat-form-field>
 
   <button mat-stroked-button color="primary" (click)="deleteRows()"
-    *ngIf="selection.selected.length > 0 && role == 'admin'">
+    *ngIf="selection.selected.length > 0">
     <mat-icon>delete</mat-icon>
     DELETE
   </button>
@@ -126,7 +137,7 @@
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)"
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"
       (contextmenu)="onContextMenu($event, row)">
     </tr>
   </table>

@@ -10,7 +10,7 @@ const routes: Routes = [
   { path: '', component: LoginComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'file-manager', component: FileManagerComponent, canActivate: [AuthGuard], data: {roles: ['admin', 'user']} },
+  { path: 'file-manager', component: FileManagerComponent, canActivate: [AuthGuard] },
   { path: 'not-authorize', pathMatch: 'full', component: NotAuthorizedComponent },
   { path: '**', redirectTo: '', pathMatch: 'full' }
 ];

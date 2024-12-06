@@ -20,7 +20,7 @@ export class LoginComponent {
     private snackBar: MatSnackBar
   ) {
     this.loginForm = this.formBuilder.group({
-      username: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
   }
@@ -31,23 +31,18 @@ export class LoginComponent {
     if (this.loginForm.invalid) {
       return;
     }
-  
-    const { username, password } = this.loginForm.value;
 
-    this.authService.getUsers().subscribe({
-      next: (users) => {
-      const user = users.find(u => u.username === username && u.password === password);
+    const { email, password } = this.loginForm.value;
 
-        if (user) {
-          sessionStorage.setItem('role', user.role);
-          this.snackBar.open('Login Successful!','Close',{duration:1000})
-          this.router.navigate(['/file-manager']); // Redirect after login
-        } else {
-          this.snackBar.open('Invalid credentials.','Close',{duration:1000})
-        }
+    this.authService.login(this.loginForm.get('email')?.value, this.loginForm.get('password')?.value).subscribe({
+      next: (response) => {
+        this.loginForm.reset()
+        this.authService.setCurrentUser(response)
+        this.snackBar.open('Login Successful!', 'Close', { duration: 1000 })
+        this.router.navigate(['/file-manager']); // Redirect after login
       },
       error: () => {
-        this.loginForm.setErrors({ unauthenticated: true });
+        this.snackBar.open('Invalid credentials.', 'Close', { duration: 1000 })
       }
     });
   }

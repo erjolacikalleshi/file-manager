@@ -12,7 +12,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class RegisterComponent {
 
   registerForm: FormGroup;
-  errorMessage: string = '';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -21,7 +20,7 @@ export class RegisterComponent {
     private snackBar: MatSnackBar
   ) {
     this.registerForm = this.formBuilder.group({
-      username: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
       role: ['user', Validators.required]
     });
@@ -33,36 +32,19 @@ export class RegisterComponent {
     if (this.registerForm.invalid) {
       return;
     }
-    
-    const newUser = this.registerForm.value;
 
-    this.authService.getUsers().subscribe((users) => {
-      // Check for duplicate username
-      const existingUser = users.find(
-        (user) => user.username === newUser.username
-      );
-  
-      if (existingUser) {
-        this.errorMessage = 'Username already exists. Please choose another.';
-        this.registerForm.get('username')?.reset();
-      } else {
-        // Proceed with registration if no duplicate is found
-        this.authService.register(newUser).subscribe(
-          () => {
-            this.errorMessage = ''
-            this.snackBar.open('Registration Successful!','Close',{duration:1000})
-            this.registerForm.reset();
-            this.router.navigate(['/login']);
-          },
-          (error) => {
-            this.registerForm.setErrors({ unauthenticated: true });
-            this.snackBar.open('Registration failed!','Close',{duration:1000})
-          }
-        );
+    const newUser = this.registerForm.value;
+    this.authService.register(newUser).subscribe({
+      next: () => {
+        this.snackBar.open('Registration Successful!', 'Close', { duration: 1000 })
+        this.registerForm.reset();
+        this.router.navigate(['/file-manager']);
+      },
+      error: (err) => {
+        this.snackBar.open(err.error, 'Close', { duration: 1000 })
       }
     });
+
   }
 
-  
-  
 }

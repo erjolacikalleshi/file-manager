@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   font-size: 14px;
-  color: #6c757d;
+  color: var(--breadcrumb-color);
   padding: 20px 10px 20px 10px;
 
   .breadcrumb-item {
@@ -10,7 +10,7 @@
 
     &.active {
       font-weight: bold;
-      color: #333;
+      color: var(--breadcrumb-active-color);
       cursor: default;
     }
   }

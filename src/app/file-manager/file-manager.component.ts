@@ -16,13 +16,13 @@ import { tabDataLoaded } from "../store/file.actions";
 })
 export class FileManagerComponent {
 
-  files: any[] = [];
-  folders: any = [];
-  data: any = [];
+  files: FileNode[] = [];
+  folders: FileNode[] = [];
+  data: FileNode[] = [];
   isSmallScreen: boolean = false;
   @ViewChild("folderTreeSidenav") folderTreeSidenav: any;
-  files$!: Observable<any>;
-  fileState: any;
+  files$!: Observable<{ [key: string]: { data: FileNode[] } }>;
+  fileState: { [key: string]: { data: FileNode[] } } | null = null;
   folderId: string = '';
 
   constructor(
@@ -46,7 +46,6 @@ export class FileManagerComponent {
         this.data = updatedTree;
         this.folders = updatedTree
           .filter((item) => item.isFolder === true)
-          .map((item) => ({ id: item.id, name: item.name }));
       },
       error: (err) => console.error("File tree update error", err),
     });
@@ -92,8 +91,15 @@ export class FileManagerComponent {
       this.data = data;
       this.folders = data
         .filter((item) => item.isFolder === true)
-        .map((item) => ({ id: item.id, name: item.name }));
     });
+  }
+
+  findChildFiles(folderId: string, items: FileNode[]): FileNode[] {
+    return items.filter(item => item.parentId === folderId && item.isFolder === false);
+  }
+
+  findChildFolders(folderId: string, items: FileNode[]): FileNode[] {
+    return items.filter(item => item.parentId === folderId && item.isFolder === true);
   }
 
   openDialog(event: any): void {
@@ -103,6 +109,8 @@ export class FileManagerComponent {
         actionType: event.action,
         folder: event.data,
         list: this.folders,
+        files: event.data ? this.findChildFiles(event.data.id, this.data) : [],
+        folders: event.data ? this.findChildFolders(event.data.id, this.data) : this.folders.filter((item: FileNode) => item.parentId === null)
       },
     });
 
@@ -137,18 +145,17 @@ export class FileManagerComponent {
             this.onRevertFile(result.folder);
             break;
           default:
-            console.warn("Unknown action:", result.action);
+            console.log("Unknown action:", result.action);
             break;
         }
       }
     });
   }
 
-  onCreateFolder(folderName: string, targetNode: any | null): void {
+  onCreateFolder(folderName: string, targetNode: FileNode | null): void {
     const parentId = targetNode ? targetNode.id : null;
     this.fileManagerService.createFolder(folderName, parentId).subscribe(
       (newFolder) => {
-        console.warn(newFolder);
         this.snackBar.open("Folder created successfully!", "Close", {
           duration: 3000,
         });
@@ -164,7 +171,7 @@ export class FileManagerComponent {
     );
   }
 
-  onDeleteFolder(folder: any): void {
+  onDeleteFolder(folder: FileNode): void {
     let folderIds;
     if (Array.isArray(folder)) {
       folderIds = folder;
@@ -174,9 +181,14 @@ export class FileManagerComponent {
 
     this.fileManagerService.deleteFolder(folderIds).subscribe({
       next: () => {
+        if (folder.isFolder) 
         this.snackBar.open("Folder deleted successfully!", "Close", {
           duration: 3000,
         });
+        else (folder.isFolder) 
+          this.snackBar.open("File deleted successfully!", "Close", {
+            duration: 3000,
+          });
         this.getData();
         this.getFiles(this.folderId)
       },
@@ -189,7 +201,7 @@ export class FileManagerComponent {
     });
   }
 
-  onRenameFolder(folder: any, newName: string): void {
+  onRenameFolder(folder: FileNode, newName: string): void {
     this.fileManagerService.renameFolder(folder, newName).subscribe({
       next: () => {
         if (folder.isFolder)
@@ -213,14 +225,14 @@ export class FileManagerComponent {
     });
   }
 
-  onUploadFile(folder: any, file: any): void {
+  onUploadFile(folder: FileNode, file: FileNode): void {
     if (file) {
       const fileData: FileNode = {
         id: this.generateUniqueId(),
         name: file.name,
         parentId: folder.id,
         date: new Date().toLocaleDateString(),
-        size: parseFloat((file.size / 1024).toFixed(2)),
+        size: file.size !== undefined ? parseFloat((file.size / 1024).toFixed(2)) : 0,
         isFolder: false,
         type: file.type,
         content: file.content,
@@ -246,7 +258,7 @@ export class FileManagerComponent {
     }
   }
 
-  onMoveFile(file: any, newFolderId: any) {
+  onMoveFile(file: FileNode, newFolderId: string) {
     this.fileManagerService.moveFile(file.id, newFolderId).subscribe({
       next: (response) => {
         this.getData();
@@ -263,29 +275,35 @@ export class FileManagerComponent {
     });
   }
 
-  onCopyFile(file: any, newFolderId: any) {
-    let newFile = this.data.find((item: any) => item.id === file.id);
-    this.fileManagerService.copyFile(newFile, newFolderId).subscribe({
-      next: (response) => {
-        this.getData();
-        this.getFiles(this.folderId)
-        this.snackBar.open("File copied successfully!", "Close", {
-          duration: 3000,
-        });
-      },
-      error: (error) => {
-        this.snackBar.open("Error copying file.", "Close", {
-          duration: 3000,
-        });
-      },
-    });
+  onCopyFile(file: FileNode, newFolderId: string) {
+    let newFile = this.data.find((item: FileNode) => item.id === file.id);
+    if (newFile) {
+      this.fileManagerService.copyFile(newFile, newFolderId).subscribe({
+        next: (response) => {
+          this.getData();
+          this.getFiles(this.folderId)
+          this.snackBar.open("File copied successfully!", "Close", {
+            duration: 3000,
+          });
+        },
+        error: (error) => {
+          this.snackBar.open("Error copying file.", "Close", {
+            duration: 3000,
+          });
+        },
+      });
+    } else {
+      this.snackBar.open("File not found.", "Close", {
+        duration: 3000,
+      });
+    }
   }
 
   generateUniqueId(): string {
     return `File${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  onAddTags(folder: any, tags: any): void {
+  onAddTags(folder: FileNode, tags: string[]): void {
     this.fileManagerService.addTags(folder.id, tags).subscribe({
       next: () => {
         this.snackBar.open("Tags updated successfully!", "Close", {
@@ -302,16 +320,16 @@ export class FileManagerComponent {
     });
   }
 
-  onCompressFile(file: any, zipName: any) {
+  onCompressFile(file: FileNode, zipName: string) {
     this.fileManagerService.compressFile(file, zipName).subscribe({
-      next: (response: any) => {
+      next: () => {
         this.snackBar.open("File compressed successfully!", "Close", {
           duration: 3000,
         });
         this.getData();
         this.getFiles(this.folderId)
       },
-      error: (error: any) => {
+      error: (error) => {
         console.error('Error compressing file:', error);
         this.snackBar.open("Failed to compress file. Please try again.", "Close", {
           duration: 3000,
@@ -320,7 +338,7 @@ export class FileManagerComponent {
     });
   }
 
-  onRevertFile(folder: any): void {
+  onRevertFile(folder: FileNode): void {
     this.fileManagerService.revertFile(folder).subscribe({
       next: () => {
         this.snackBar.open("File reverted successfully!", "Close", {

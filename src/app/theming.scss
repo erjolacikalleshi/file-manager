@@ -12,11 +12,26 @@ $dark-accent: mat-palette($mat-orange);
 $dark-warn: mat-palette($mat-deep-orange);
 $dark-theme: mat-dark-theme($dark-primary, $dark-accent, $dark-warn);
 
+:root {
+  --selected-background-light: #f0f0f0;
+  --selected-background-dark: #673ab7;
+  --breadcrumb-color-light: #6c757d;
+  --breadcrumb-color-dark: #fff;
+  --breadcrumb-active-color-light: #333;
+  --breadcrumb-active-color-dark: #fff;
+}
+
 // Define theme classes
 .light-theme {
   @include angular-material-theme($light-theme);
+  --selected-background: var(--selected-background-light);
+  --breadcrumb-color: var(--breadcrumb-color-light);
+  --breadcrumb-active-color: var(--breadcrumb-active-color-light);
 }
 
 .dark-theme {
   @include angular-material-theme($dark-theme);
+  --selected-background: var(--selected-background-dark);
+  --breadcrumb-color: var(--breadcrumb-color-dark);
+  --breadcrumb-active-color: var(--breadcrumb-active-color-dark);
 }

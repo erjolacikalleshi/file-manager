@@ -56,8 +56,8 @@
             hidden />
         </button>
 
-        <div *ngIf="selectedFile" class="file-info">
-          <p>Selected File: {{ selectedFile.name }}</p>
+        <div *ngIf="selectedFileName" class="file-info">
+          <p>Selected File: {{ selectedFileName }}</p>
         </div>
       </div>
     </div>
@@ -117,7 +117,7 @@
 <mat-dialog-actions class="dialog-actions-end">
   <button mat-button (click)="onCancel()">Cancel</button>
   <button mat-button color="primary" (click)="onSubmit()" cdkFocusInitial
-    [disabled]="(actionType === 'upload' && !selectedFile) || (actionType === 'create' && !newFolderName)">
+    [disabled]="(actionType === 'upload' && isUploadDisabled) || (actionType === 'create' && !newFolderName)">
     <ng-container [ngSwitch]="actionType">
       <span *ngSwitchCase="'create'">Create</span>
       <span *ngSwitchCase="'rename'">Rename</span>

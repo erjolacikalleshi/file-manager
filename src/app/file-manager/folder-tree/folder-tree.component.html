@@ -12,9 +12,15 @@
     matTreeNodePadding>
       <button mat-icon-button disabled></button> 
       
-      <mat-icon class="node-icon" aria-hidden="true" *ngIf="!node.isFolder">insert_drive_file</mat-icon>   
-      <mat-icon class="node-icon" aria-hidden="true" *ngIf="node.isFolder">folder</mat-icon>     
-      {{ node.name }}
+      <div class="clickable-node" *ngIf="node.isFolder" [class.selected]="selectedNode && selectedNode.id === node.id" (click)="onNodeSelect(node)">
+        <mat-icon class="node-icon" aria-hidden="true">folder</mat-icon>    
+        {{ node.name }}
+      </div>
+      <div *ngIf="!node.isFolder">
+        <mat-icon class="node-icon" aria-hidden="true">insert_drive_file</mat-icon>   
+        {{ node.name }}
+      </div>
+      
       <!-- More options button -->
       <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="More options" class="more-options-button">
         <mat-icon>more_vert</mat-icon>
@@ -22,7 +28,7 @@
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="setAction('create', node)" *ngIf="node.isFolder"><mat-icon>create_new_folder</mat-icon><span>New Directory</span></button>
         <button mat-menu-item (click)="setAction('rename', node)"><mat-icon>drive_file_rename_outline</mat-icon><span>Rename</span></button>
-        <button mat-menu-item (click)="setAction('delete', node)" *ngIf="role == 'admin'"><mat-icon>delete_outline</mat-icon><span>Delete</span></button>
+        <button mat-menu-item (click)="setAction('delete', node)"><mat-icon>delete_outline</mat-icon><span>Delete</span></button>
         <button mat-menu-item (click)="setAction('upload', node)" *ngIf="node.isFolder"><mat-icon>upload_file</mat-icon><span>Upload File</span></button>
         <button mat-menu-item (click)="setAction('move', node)" *ngIf="!node.isFolder"><mat-icon>input</mat-icon><span>Move To</span></button>
         <button mat-menu-item (click)="setAction('copy', node)" *ngIf="!node.isFolder"><mat-icon>file_copy</mat-icon><span>Copy To</span></button>
@@ -34,7 +40,7 @@
     <!-- Tree node template for expandable nodes (folders) -->
     <mat-tree-node *matTreeNodeDef="let node;when: hasChild"
     matTreeNodePadding>
-      <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name" (click)="expansionModel.toggle(node.id)">
+      <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name">
         <mat-icon class="mat-icon-rtl-mirror">{{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}</mat-icon>
       </button>
       <div class="clickable-node" [class.selected]="selectedNode && selectedNode.id === node.id" (click)="onNodeSelect(node)">
@@ -56,7 +62,7 @@
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="setAction('create', node)"><mat-icon>create_new_folder</mat-icon><span>New Directory</span></button>
         <button mat-menu-item (click)="setAction('rename', node)"><mat-icon>drive_file_rename_outline</mat-icon><span>Rename</span></button>
-        <button mat-menu-item (click)="setAction('delete', node)" *ngIf="role == 'admin'"><mat-icon>delete_outline</mat-icon><span>Delete</span></button>
+        <button mat-menu-item (click)="setAction('delete', node)"><mat-icon>delete_outline</mat-icon><span>Delete</span></button>
         <button mat-menu-item (click)="setAction('upload', node)"><mat-icon>upload_file</mat-icon><span>Upload File</span></button>
       </mat-menu>
     </mat-tree-node>

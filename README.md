@@ -5,7 +5,7 @@
 ## Running the Application
 Start the mock backend server:
 ```bash
-json-server src/app/db.json --port 3000
+npx json-server-auth src/app/db.json
 ```
 ---
 
@@ -13,10 +13,8 @@ json-server src/app/db.json --port 3000
 
 ### Authentication and Role-Based Access Control (RBAC)
 - **Login:** 
-  - Three user roles with distinct access permissions:
-    - **Admin:** Full access to all actions.
-    - **User:** Full access except for delete operations.
-    - **Random:** No access to the File Manager page.
+  - **User:** 
+    - Custom Login implemented using server.js, as login of json server auth adds users in db.json
 - **Register:** 
   - Newly registered users are assigned the `user` role by default.
 
@@ -115,13 +113,7 @@ json-server src/app/db.json --port 3000
 - **Snack Bars:** 
   - Used for success and error messages during user actions.
 - **User accounts:**
-  - Admin:
-    - username: admin
-    - pass: adminpassword
   - User:
-    - username: user
-    - pass: userpassword
-  - User with no access:
-    - username: random
-    - pass: randompassword
+    - email: user@gmail.com
+    - pass: test
 

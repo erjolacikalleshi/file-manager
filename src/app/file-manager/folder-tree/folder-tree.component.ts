@@ -2,9 +2,6 @@ import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { FileNode, FileVersion } from '../../models/file-node.model';
 import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { SelectionModel } from '@angular/cdk/collections';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
 
 interface ExampleFlatNode {
   expandable: boolean;
@@ -23,20 +20,15 @@ interface ExampleFlatNode {
 })
 export class FolderTreeComponent {
 
-  @Output() folderOpened = new EventEmitter<any>();
-  selectedNode: any = null;
-  @Input() data: any = [];
-  @Output() actionTriggered = new EventEmitter<{ action: string, data: any }>();
+  @Output() folderOpened = new EventEmitter<string>();
+  selectedNode: ExampleFlatNode | null = null;
+  @Input() data: FileNode[] = [];
+  @Output() actionTriggered = new EventEmitter<{ action: string, data: FileNode | null }>();
   breadcrumbs: any[] = [];
-  nodeMap: Map<string, any> = new Map();
-  expansionModel = new SelectionModel<string>(true);
-  dragging = false;
-  expandTimeout: any;
-  expandDelay = 1000;
-  role: any;
-  highlightedNode: any = null;
+  nodeMap: Map<string, FileNode> = new Map();
+  role: string | null = null;
 
-  constructor(private snackBar: MatSnackBar) {
+  constructor() {
   }
 
   ngOnInit() {
@@ -94,14 +86,14 @@ export class FolderTreeComponent {
   dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
   hasChild = (_: number, node: ExampleFlatNode) => node.expandable;
 
-  onNodeSelect(node: any): void {
+  onNodeSelect(node: ExampleFlatNode): void {
     this.selectedNode = node;
-    this.folderOpened.emit(this.selectedNode.id);
+    this.folderOpened.emit(this.selectedNode?.id);
     this.breadcrumbs = this.constructBreadcrumb(this.selectedNode);
   }
 
   //map all nodes by their id
-  mapNodes(nodes: any[]) {
+  mapNodes(nodes: FileNode[]) {
     nodes.forEach((node) => {
       this.nodeMap.set(node.id, node);
       if (node.children) {
@@ -110,16 +102,16 @@ export class FolderTreeComponent {
     });
   }
 
-  constructBreadcrumb(node: any): any[] {
+  constructBreadcrumb(node: ExampleFlatNode | null): FileNode[] {
     const breadcrumb = [];
 
-    let currentNode = this.nodeMap.get(node.id);
+    let currentNode = node ? this.nodeMap.get(node.id) : null;
 
     while (currentNode) {
       if (!currentNode) break;
       breadcrumb.unshift(currentNode);
 
-      currentNode = this.nodeMap.get(currentNode.parentId);
+      currentNode = currentNode.parentId ? this.nodeMap.get(currentNode.parentId) : null;
     }
 
     return breadcrumb;
@@ -130,7 +122,7 @@ export class FolderTreeComponent {
     this.onNodeSelect(crumb)
   }
 
-  setAction(action: string, folder: any): void {
+  setAction(action: string, folder: FileNode | null): void {
     if (action === 'create') {
       this.actionTriggered.emit({ action: 'create', data: folder });
     }
@@ -152,115 +144,6 @@ export class FolderTreeComponent {
     else if (action === "revert") {
       this.actionTriggered.emit({ action: "revert", data: folder });
     }
-  }
-
-  //constructs an array of nodes that matches the DOM
-  visibleNodes(): FileNode[] {
-    const result: FileNode[] = [];
-
-    const addExpandedChildren = (node: FileNode, expanded: string[]) => {
-      result.push(node);
-      if (expanded.includes(node.id)) {
-        node.children?.forEach((child) => addExpandedChildren(child, expanded));
-      }
-    };
-
-    this.dataSource.data.forEach((node) => addExpandedChildren(node, this.expansionModel.selected));
-    return result;
-  }
-
-  //rearrange the data based on the drop event then rebuild the tree
-  drop(event: CdkDragDrop<FileNode[]>): void {
-    if (!event.isPointerOverContainer) return;
-
-    const visibleNodes = this.visibleNodes();
-    const changedData = JSON.parse(JSON.stringify(this.dataSource.data)) as FileNode[];
-
-    const findNodeAndSiblings = (
-      arr: FileNode[],
-      id: string
-    ): { siblings: FileNode[] | null; node: FileNode | null } => {
-      for (const item of arr) {
-        if (item.id === id) {
-          return { siblings: arr, node: item };
-        } else if (item.children) {
-          const result = findNodeAndSiblings(item.children, id);
-          if (result.node) return result;
-        }
-      }
-      return { siblings: null, node: null };
-    };
-
-    const nodeAtDest = visibleNodes[event.currentIndex];
-    
-    this.highlightedNode = nodeAtDest;
-
-    const { siblings: newSiblings, node: targetNode } = findNodeAndSiblings(changedData, nodeAtDest.id);
-    if (!newSiblings || !targetNode) return;
-
-    const insertIndex = newSiblings.findIndex((s) => s.id === nodeAtDest.id);
-
-    const node = event.item.data;
-    const { siblings, node: nodeToMove } = findNodeAndSiblings(changedData, node.id);
-
-    if (!siblings || !nodeToMove) return;
-
-    const nodeAtDestFlatNode = this.treeControl.dataNodes.find((n) => nodeAtDest.id === n.id);
-
-    // if (
-    //   !targetNode.isFolder 
-      
-    // ) {
-    //   alert('Invalid move: Check level, folder destination, and move hierarchy.');
-    //   return;
-    // }
-
-    const siblingIndex = siblings.findIndex((n) => n.id === node.id);
-    const removedNode = siblings.splice(siblingIndex, 1)[0];
-    removedNode.parentId = targetNode.id;
-
-    newSiblings.splice(insertIndex, 0, removedNode);
-
-    this.highlightedNode = null;
-    this.rebuildTreeForData(changedData);
-  }
-
-  dragStart() {
-    this.dragging = true;
-  }
-
-  dragEnd() {
-    this.dragging = false;
-  }
-
-  dragHover(node: ExampleFlatNode) {
-    if (this.dragging) {
-      clearTimeout(this.expandTimeout);
-      this.expandTimeout = setTimeout(() => {
-        this.treeControl.expand(node);
-      }, this.expandDelay);
-    }
-  }
-
-  dragHoverEnd() {
-    if (this.dragging) {
-      clearTimeout(this.expandTimeout);
-    }
-  }
-
-  //for persist the tree expand state after being rebuilt
-  rebuildTreeForData(data: any) {
-    this.dataSource.data = data;
-
-    this.expansionModel.selected.forEach((id) => {
-      const node = this.treeControl.dataNodes.find((n) => n.id === id);
-
-      if (node) {
-        this.treeControl.expand(node);
-      } else {
-        console.log(`Node with id ${id} not found.`);
-      }
-    });
   }
 
 }

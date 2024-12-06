@@ -11,7 +11,7 @@ import { AuthService } from './auth/service/auth.service';
 export class AppComponent {
   title = 'file-manager';
   currentUrl: string = '';
-  message:any = null;
+  message = null;
   loginUrls = ['/', '/register'];
 
   constructor(private themeService: ThemeService,

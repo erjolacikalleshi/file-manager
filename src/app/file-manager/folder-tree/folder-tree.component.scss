@@ -10,7 +10,7 @@
 	padding: 8px;
 	cursor: pointer;
 	&.selected {
-		background-color: #f0f0f0;
+		background-color: var(--selected-background);
 		font-weight: bold;
 	}
 }

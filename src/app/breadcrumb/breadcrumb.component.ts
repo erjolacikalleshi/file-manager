@@ -1,5 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
+export interface Breadcrumb {
+  name: string;
+  path: string;
+}
+
 @Component({
   selector: 'app-breadcrumb',
   templateUrl: './breadcrumb.component.html',
@@ -7,10 +12,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 })
 export class BreadcrumbComponent {
 
-  @Input() breadcrumbs: any[] = [];
-  @Output() breadcrumbClick = new EventEmitter<any>();
+  @Input() breadcrumbs: Breadcrumb[] = [];
+  @Output() breadcrumbClick = new EventEmitter<Breadcrumb>();
 
-  navigateTo(crumb: any) {
+  navigateTo(crumb: Breadcrumb) {
     this.breadcrumbClick.emit(crumb);
   }
   

@@ -15,7 +15,7 @@ import { FolderTreeComponent } from './file-manager/folder-tree/folder-tree.comp
 import { FileListComponent } from './file-manager/file-list/file-list.component';
 import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { MatMenuModule } from '@angular/material/menu';
 import { FormsModule } from '@angular/forms';
 import { MatRadioModule } from '@angular/material/radio';
@@ -45,6 +45,7 @@ import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { fileReducer } from './store/file.reducer';
 import { FileEffects } from './store/file.effects';
+import { AuthInterceptor } from './auth/interceptors/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -96,7 +97,13 @@ import { FileEffects } from './store/file.effects';
     StoreModule.forRoot({file: fileReducer}, {}),
     EffectsModule.forRoot([FileEffects])
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

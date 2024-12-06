@@ -17,17 +17,19 @@ export class FileListComponent {
 
   @Input() files: FileNode[] = [];
   displayedColumns: string[] = ['select', 'icon', 'name', 'date', 'size', 'tags', 'actions'];
-  selection = new SelectionModel<any>(true, []);
+  selection = new SelectionModel<FileNode>(true, []);
   searchQuery: string = '';
   searchTags: string = '';
   @ViewChild(MatSort) sort!: MatSort;
   dataSource = new MatTableDataSource<FileNode>();
   selectedFileType: string[] = [];
   @ViewChild(MatMenuTrigger) contextMenu!: MatMenuTrigger;
-  @Output() actionTriggered = new EventEmitter<{ action: string, data: any }>();
+  @Output() actionTriggered = new EventEmitter<{ action: string, data: FileNode }>();
   contextMenuPosition = { x: '0px', y: '0px' };
   selectedRows = [];
-  role: any;
+  role: string | null = null;
+  uniqueFileTypes: string[] = [];
+  showMsg: boolean = true;
 
   constructor(private dialog: MatDialog,
   ) {
@@ -37,7 +39,7 @@ export class FileListComponent {
     this.role = sessionStorage.getItem('role')
   }
 
-  onContextMenu(event: MouseEvent, item: any) {
+  onContextMenu(event: MouseEvent, item: FileNode) {
     event.preventDefault();
     this.contextMenuPosition.x = event.clientX + 'px';
     this.contextMenuPosition.y = event.clientY + 'px';
@@ -48,7 +50,9 @@ export class FileListComponent {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['files'] && changes['files'].currentValue) {
+      changes['files'].firstChange ? this.showMsg = true : this.showMsg = false;
       this.dataSource.data = [...this.files];
+      this.uniqueFileTypes = [...new Set(this.files.map(file => file.type).filter((type): type is string => type !== undefined))];
     }
   }
 
@@ -104,34 +108,45 @@ export class FileListComponent {
   applyFilter(): void {
     const filterQuery = this.searchQuery.trim().toLowerCase();
     const filterTags = this.searchTags.toLowerCase();
+    const removeFileExtension = (filename: string) => filename.replace(/\.[^/.]+$/, '').toLowerCase();
 
     // Filter files by name and tags at the same time
     this.dataSource.data = this.files.filter(file => 
-      (file.name.toLowerCase().includes(filterQuery)) && 
+      (removeFileExtension(file.name).includes(filterQuery)) &&
       (file.tags?.some(tag => tag.toLowerCase().includes(filterTags)) || !filterTags)
     );
   }
 
   applyAdvancedFilter() {
     const filterValue = this.selectedFileType || [];
-  
-    // Define MIME type categories
-    const mimeTypeCategories = {
-      image: ['image/jpeg', 'image/png', 'image/gif'],
-      document: ['application/pdf', 'text/plain', 'application/msword', 'application/zip']
-    };
-  
-    const mimeTypesToFilter: string[] = filterValue.reduce((acc: string[], type) => {
-      if (mimeTypeCategories[type as keyof typeof mimeTypeCategories]) {
-        acc = acc.concat(mimeTypeCategories[type as keyof typeof mimeTypeCategories]);
-      }
-      return acc;
-    }, []);
+
+    if (filterValue.length === 0) {
+      this.dataSource.data = this.files;
+      return;
+    }
 
     this.dataSource.data = this.files.filter(file => {
       const fileType = file.type || '';
-      return mimeTypesToFilter.length > 0 ? mimeTypesToFilter.includes(fileType) : true;
+      return filterValue.includes(fileType);
     });
+  
+    // Define MIME type categories
+    // const mimeTypeCategories = {
+    //   image: ['image/jpeg', 'image/png', 'image/gif'],
+    //   document: ['application/pdf', 'text/plain', 'application/msword', 'application/zip']
+    // };
+  
+    // const mimeTypesToFilter: string[] = filterValue.reduce((acc: string[], type) => {
+    //   if (mimeTypeCategories[type as keyof typeof mimeTypeCategories]) {
+    //     acc = acc.concat(mimeTypeCategories[type as keyof typeof mimeTypeCategories]);
+    //   }
+    //   return acc;
+    // }, []);
+
+    // this.dataSource.data = this.files.filter(file => {
+    //   const fileType = file.type || '';
+    //   return mimeTypesToFilter.length > 0 ? mimeTypesToFilter.includes(fileType) : true;
+    // });
   }
 
   deleteRows() {
@@ -170,7 +185,7 @@ export class FileListComponent {
     }
   }
 
-  previewFile(file: any) {
+  previewFile(file: FileNode) {
     if (!file || typeof file !== 'object') {
       console.error('Invalid file data');
       return;

@@ -6,11 +6,11 @@
       </mat-card-header>
       <mat-card-content>
         <mat-form-field class="example-full-width">
-          <mat-label>Username</mat-label>
-          <input matInput formControlName="username" [ngClass]="{ 'is-invalid': f['username'].errors }" />
-          <mat-icon matSuffix>person</mat-icon>
-          <mat-error *ngIf="f['username'].errors">
-            <span *ngIf="f['username'].errors['required']">Username is required</span>
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" [ngClass]="{ 'is-invalid': f['email'].errors }" />
+          <mat-icon matSuffix>email</mat-icon>
+          <mat-error *ngIf="f['email'].errors">
+            <span *ngIf="f['email'].errors['required']">Email is required</span>
           </mat-error>
         </mat-form-field>
         <mat-form-field class="example-full-width">

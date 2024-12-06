@@ -12,7 +12,7 @@
 
     <!-- Preview for Text Files -->
     <pre *ngIf="file.type === 'text/plain'">
-      <textarea readonly rows="10" cols="50">{{ file.content }}</textarea>
+      {{ file.content }}
     </pre>
 
     <!-- Preview for PDF Files -->

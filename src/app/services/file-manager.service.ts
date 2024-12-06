@@ -330,7 +330,7 @@ export class FileManagerService {
   }
 
   // Add tags to a folder/file
-  addTags(folderId: string, newTags: any): Observable<FileNode> {
+  addTags(folderId: string, newTags: string[]): Observable<FileNode> {
     if (this.isOnline) {
       return this.http
         .patch<FileNode>(`${this.apiUrl}/${folderId}`, { tags: newTags })
